@@ -1,0 +1,103 @@
+{
+	"meta": {
+		"title": "Amis's Blog",
+		"description": "Amis 的个人博客，记录开发、探索、笔记。 更新代码仓库。",
+		"username": "Amis"
+	},
+	"theme": {
+		"colorBrand": "#16DB9F",
+		"colorPrimary": "#334f52",
+		"colorSecondary": "#7b888e",
+		"colorBrandSecondary": "#1fc9e7",
+		"colorBg": "#eeeeee",
+		"colorBorder": "#ffffff",
+		"colorCard": "#ffffff66",
+		"colorArticle": "#ffffffcc"
+	},
+	"backgroundColors": [
+		"#2779BD",
+		"#DD7437",
+		"#FCF9BA",
+		"#D55ABD",
+		"#FD0336",
+		"#0C5B45",
+		"#5056C9",
+		"#8BA670"
+	],
+	"artImages": [
+		{
+			"id": "cat",
+			"url": "/images/art/cat.png"
+		},
+		{
+			"id": "a46372ff45bc5524",
+			"url": "/images/art/a46372ff45bc5524.jpg"
+		},
+		{
+			"id": "944e9cdefe46b196",
+			"url": "/images/art/944e9cdefe46b196.jpg"
+		},
+		{
+			"id": "607165f3e5fecea7",
+			"url": "/images/art/607165f3e5fecea7.jpg"
+		}
+	],
+	"currentArtImageId": "944e9cdefe46b196",
+	"backgroundImages": [
+		{
+			"id": "",
+			"url": ""
+		}
+	],
+	"currentBackgroundImageId": "",
+	"socialButtons": [
+		{
+			"id": "github",
+			"type": "github",
+			"value": "https://github.com/AmisKwok",
+			"label": "Github",
+			"order": 1
+		},
+		{
+			"id": "juejin",
+			"type": "gitee",
+			"value": "https://gitee.com/AmisKwok",
+			"label": "Gitee",
+			"order": 2
+		},
+		{
+			"id": "button-1771682789690",
+			"type": "qq",
+			"value": "/images/social-buttons/ec4f06a94c077b3b.png",
+			"label": "",
+			"order": 3
+		}
+	],
+	"clockShowSeconds": false,
+	"summaryInContent": false,
+	"isCachePem": false,
+	"hideEditButton": false,
+	"enableCategories": true,
+	"currentHatIndex": 24,
+	"hatFlipped": false,
+	"enableChristmas": true,
+	"enableBackgroundBlur": false,
+	"beian": {
+		"text": "",
+		"link": ""
+	},
+	"waline": {
+		"serverURL": "https://www.amisweb.online/",
+		"theme": "auto",
+		"dark": "auto",
+		"options": {
+			"requiredMeta": [
+				"nick",
+				"mail"
+			],
+			"pageview": true,
+			"imageUploader": false,
+			"math": false
+		}
+	}
+}

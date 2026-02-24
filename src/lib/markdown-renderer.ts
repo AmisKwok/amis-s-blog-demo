@@ -1,0 +1,273 @@
+/**
+ * Markdown 渲染器
+ * 用于将 Markdown 文本渲染为 HTML，支持代码高亮和数学公式
+ */
+import { marked } from 'marked'
+import type { Tokens } from 'marked'
+
+/**
+ * 目录项接口
+ */
+export type TocItem = { id: string; text: string; level: number }
+
+/**
+ * Markdown 渲染结果接口
+ */
+export interface MarkdownRenderResult {
+	html: string // 渲染后的 HTML
+	toc: TocItem[] // 目录项数组
+}
+
+/**
+ * 将文本转换为 slug
+ * @param text 输入文本
+ * @returns 转换后的 slug
+ */
+export function slugify(text: string): string {
+	return text
+		.toLowerCase()
+		.replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
+		.trim()
+		.replace(/\s+/g, '-')
+}
+
+// 延迟加载 shiki 以处理不可用的环境（如 Cloudflare Workers）
+let shikiModule: typeof import('shiki') | null = null
+let shikiLoadAttempted = false
+
+/**
+ * 加载 shiki 模块
+ * @returns shiki 模块或 null
+ */
+async function loadShiki() {
+	if (shikiLoadAttempted) {
+		return shikiModule
+	}
+	shikiLoadAttempted = true
+
+	try {
+		shikiModule = await import('shiki')
+		return shikiModule
+	} catch (error) {
+		console.warn('Failed to load shiki module:', error)
+		return null
+	}
+}
+
+// 延迟加载 katex 以处理不可用的环境（如 Cloudflare Workers）
+let katexModule: typeof import('katex') | null = null
+let katexLoadAttempted = false
+
+/**
+ * 加载 katex 模块
+ * @returns katex 模块或 null
+ */
+async function loadKatex() {
+	if (katexModule) return katexModule
+	if (katexLoadAttempted) return null
+	katexLoadAttempted = true
+
+	try {
+		// katex 以 CJS 格式发布；根据打包工具/运行时的不同，动态导入
+		// 可能直接返回导出对象或作为 `default`
+		const mod: any = await import('katex')
+		katexModule = (mod?.default ?? mod) as any
+		return katexModule
+	} catch (error) {
+		console.warn('Failed to load katex module:', error)
+		return null
+	}
+}
+
+/**
+ * 渲染 Markdown 文本
+ * @param markdown Markdown 文本
+ * @returns 渲染结果，包含 HTML 和目录
+ */
+export async function renderMarkdown(markdown: string): Promise<MarkdownRenderResult> {
+	// 先加载可选的渲染器，以便它们在第一次词法分析/解析时应用
+	// （如果我们在注册扩展之前进行词法分析，在冷刷新时数学标记将永远不会生成）
+	const codeBlockMap = new Map<string, { html: string; original: string }>()
+	const [shiki, katex] = await Promise.all([loadShiki(), loadKatex()])
+
+	// 渲染带有标题 ID 的 HTML
+	const renderer = new marked.Renderer()
+
+	/**
+	 * 渲染标题
+	 */
+	renderer.heading = (token: Tokens.Heading) => {
+		const id = slugify(token.text || '')
+		return `<h${token.depth} id="${id}">${token.text}</h${token.depth}>`
+	}
+
+	/**
+	 * 渲染代码块
+	 */
+	renderer.code = (token: Tokens.Code) => {
+		// 检查此代码块是否已预处理
+		const codeData = codeBlockMap.get(token.text)
+		if (codeData) {
+			// 添加 data-code 属性，包含原始代码用于复制功能
+			// 为属性值转义 HTML 实体
+			const escapedCode = codeData.original.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+			if (codeData.html) {
+				// Shiki 高亮代码
+				return `<pre data-code="${escapedCode}">${codeData.html}</pre>`
+			}
+			// 高亮失败的回退
+			return `<pre data-code="${escapedCode}"><code>${codeData.original}</code></pre>`
+		}
+		// 回退到默认值（内联代码，不是代码块）
+		return `<code>${token.text}</code>`
+	}
+
+	/**
+	 * 渲染列表项
+	 */
+	renderer.listitem = (token: Tokens.ListItem) => {
+		// 渲染列表项内的内联 Markdown（如链接、强调）
+		let inner = token.text
+		let tokens = token.tokens
+
+		if (token.task) tokens = tokens.slice(1)
+		inner = marked.parser(tokens) as string
+
+		if (token.task) {
+			const checkbox = token.checked ? '<input type="checkbox" checked disabled />' : '<input type="checkbox" disabled />'
+			return `<li class="task-list-item">${checkbox} ${inner}</li>\n`
+		}
+
+		return `<li>${inner}</li>\n`
+	}
+
+	/**
+	 * 渲染数学公式
+	 */
+	const renderMath = (content: string, displayMode: boolean) => {
+		if (!katex) {
+			// 如果 katex 不可用，保留原始分隔符
+			return displayMode ? `$$${content}$$` : `$${content}$`
+		}
+
+		try {
+			return katex.renderToString(content, {
+				displayMode,
+				throwOnError: false,
+				output: 'html',
+				strict: 'ignore'
+			})
+		} catch {
+			return displayMode ? `$$${content}$$` : `$${content}$`
+		}
+	}
+
+	// 在词法分析之前注册扩展，以便数学在冷刷新时被标记化
+	marked.use({
+		renderer,
+		extensions: [
+			// 块级数学公式：$$ ... $$
+			{
+				name: 'mathBlock',
+				level: 'block',
+				start(src: string) {
+					return src.indexOf('$$')
+				},
+				tokenizer(src: string) {
+					const match = src.match(/^\$\$([\s\S]+?)\$\$(?:\n+|$)/)
+					if (!match) return
+					return {
+						type: 'mathBlock',
+						raw: match[0],
+						text: match[1].trim()
+					} as any
+				},
+				renderer(token: any) {
+					return `${renderMath(token.text || '', true)}\n`
+				}
+			},
+			// 内联数学公式：$ ... $
+			{
+				name: 'mathInline',
+				level: 'inline',
+				start(src: string) {
+					const idx = src.indexOf('$')
+					return idx === -1 ? undefined : idx
+				},
+				tokenizer(src: string) {
+					// 避免 $$（块级）和转义的美元符号
+					if (src.startsWith('$$')) return
+					if (src.startsWith('\\$')) return
+
+					const match = src.match(/^\$([^\n$]+?)\$/)
+					if (!match) return
+
+					const inner = match[1]
+					// 启发式：要求一些非空格内容
+					if (!inner || !inner.trim()) return
+
+					return {
+						type: 'mathInline',
+						raw: match[0],
+						text: inner.trim()
+					} as any
+				},
+				renderer(token: any) {
+					return renderMath(token.text || '', false)
+				}
+			}
+		]
+	})
+
+	// 使用 marked 词法分析器进行预处理（在注册扩展后）
+	const tokens = marked.lexer(markdown)
+
+	// 从解析的令牌中提取目录（这会正确跳过代码块）
+	const toc: TocItem[] = []
+	function extractHeadings(tokenList: typeof tokens) {
+		for (const token of tokenList) {
+			if (token.type === 'heading' && token.depth <= 3) {
+				// 使用解析后的文本（已经去除了链接/代码等 Markdown 语法）
+				const text = token.text
+				const id = slugify(text)
+				toc.push({ id, text, level: token.depth })
+			}
+			// 递归检查嵌套令牌（例如在块引用、列表中）
+			if ('tokens' in token && token.tokens) {
+				extractHeadings(token.tokens as typeof tokens)
+			}
+		}
+	}
+	extractHeadings(tokens)
+
+	// 使用 Shiki 预处理代码块
+	for (const token of tokens) {
+		if (token.type === 'code') {
+			const codeToken = token as Tokens.Code
+			const originalCode = codeToken.text
+			const key = `__SHIKI_CODE_${codeBlockMap.size}__`
+
+			if (shiki) {
+				try {
+					const html = await shiki.codeToHtml(originalCode, {
+						lang: codeToken.lang || 'text',
+						theme: 'one-light'
+					})
+					codeBlockMap.set(key, { html, original: originalCode })
+					codeToken.text = key
+				} catch {
+					// 高亮失败时保留原始代码
+					codeBlockMap.set(key, { html: '', original: originalCode })
+					codeToken.text = key
+				}
+			} else {
+				// shiki 不可用时的回退
+				codeBlockMap.set(key, { html: '', original: originalCode })
+				codeToken.text = key
+			}
+		}
+	}
+	const html = (marked.parser(tokens) as string) || ''
+
+	return { html, toc }
+}

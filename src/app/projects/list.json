@@ -1,0 +1,25 @@
+[
+	{
+		"name": "Vibe Music",
+		"year": 1,
+		"image": "/images/project/ac9881f8db9513c5.png",
+		"url": "https://github.com/Nikoyaya/vibe-music-app",
+		"description": "基于Flutter开发的跨端音乐应用",
+		"tags": [
+			"Flutter"
+		],
+		"github": "https://github.com/Nikoyaya/vibe-music-app"
+	},
+	{
+		"name": "Vibe Music Server",
+		"year": 2,
+		"image": "/images/project/9f40327af19232a6.jpg",
+		"url": "https://github.com/AmisKwok/vibe-music-server",
+		"description": "Java开发的Vibe Music应用的后端",
+		"tags": [
+			"Java",
+			"SpringBoot"
+		],
+		"github": "https://github.com/AmisKwok/vibe-music-server"
+	}
+]
