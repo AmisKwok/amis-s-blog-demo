@@ -18,14 +18,41 @@ export type { BlogIndexItem } from '@/app/blog/types'
  * @param item 博客索引项
  * @param branch 分支名称
  */
-export async function upsertBlogsIndex(token: string, owner: string, repo: string, item: BlogIndexItem, branch: string): Promise<void> {
+export async function upsertBlogsIndex(token: string, owner: string, repo: string, item: BlogIndexItem, ref: string): Promise<void> {
 	const indexPath = 'public/blogs/index.json'
 	let list: BlogIndexItem[] = []
 	try {
-		const txt = await readTextFileFromRepo(token, owner, repo, indexPath, branch)
-		if (txt) list = JSON.parse(txt)
+		// 尝试从 GitHub 读取索引文件
+		const txt = await readTextFileFromRepo(token, owner, repo, indexPath, ref)
+		if (txt) {
+			list = JSON.parse(txt)
+		} else {
+			// 如果 GitHub 上没有索引文件，尝试从本地读取
+			try {
+				const response = await fetch('/blogs/index.json')
+				if (response.ok) {
+					const localData = await response.json()
+					if (Array.isArray(localData)) {
+						list = localData
+					}
+				}
+			} catch {
+				// 忽略本地读取错误
+			}
+		}
 	} catch {
-		// 忽略解析错误，从空列表开始
+		// 忽略 GitHub 读取错误，尝试从本地读取
+		try {
+			const response = await fetch('/blogs/index.json')
+			if (response.ok) {
+				const localData = await response.json()
+				if (Array.isArray(localData)) {
+					list = localData
+				}
+			}
+		} catch {
+			// 忽略本地读取错误，保持空列表
+		}
 	}
 	// 使用 Map 去重并更新项
 	const map = new Map<string, BlogIndexItem>(list.map(i => [i.slug, i]))
@@ -33,7 +60,7 @@ export async function upsertBlogsIndex(token: string, owner: string, repo: strin
 	// 按日期降序排序
 	const next = Array.from(map.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''))
 	const base64 = toBase64Utf8(JSON.stringify(next, null, 2))
-	await putFile(token, owner, repo, indexPath, base64, 'Update blogs index', branch)
+	await putFile(token, owner, repo, indexPath, base64, 'Update blogs index', ref)
 }
 
 /**
@@ -45,14 +72,41 @@ export async function upsertBlogsIndex(token: string, owner: string, repo: strin
  * @param branch 分支名称
  * @returns 格式化的 JSON 字符串
  */
-export async function prepareBlogsIndex(token: string, owner: string, repo: string, item: BlogIndexItem, branch: string): Promise<string> {
+export async function prepareBlogsIndex(token: string, owner: string, repo: string, item: BlogIndexItem, ref: string): Promise<string> {
 	const indexPath = 'public/blogs/index.json'
 	let list: BlogIndexItem[] = []
 	try {
-		const txt = await readTextFileFromRepo(token, owner, repo, indexPath, branch)
-		if (txt) list = JSON.parse(txt)
+		// 尝试从 GitHub 读取索引文件
+		const txt = await readTextFileFromRepo(token, owner, repo, indexPath, ref)
+		if (txt) {
+			list = JSON.parse(txt)
+		} else {
+			// 如果 GitHub 上没有索引文件，尝试从本地读取
+			try {
+				const response = await fetch('/blogs/index.json')
+				if (response.ok) {
+					const localData = await response.json()
+					if (Array.isArray(localData)) {
+						list = localData
+					}
+				}
+			} catch {
+				// 忽略本地读取错误
+			}
+		}
 	} catch {
-		// 忽略解析错误，从空列表开始
+		// 忽略 GitHub 读取错误，尝试从本地读取
+		try {
+			const response = await fetch('/blogs/index.json')
+			if (response.ok) {
+				const localData = await response.json()
+				if (Array.isArray(localData)) {
+					list = localData
+				}
+			}
+		} catch {
+			// 忽略本地读取错误，保持空列表
+		}
 	}
 	// 使用 Map 去重并更新项
 	const map = new Map<string, BlogIndexItem>(list.map(i => [i.slug, i]))
@@ -71,14 +125,41 @@ export async function prepareBlogsIndex(token: string, owner: string, repo: stri
  * @param branch 分支名称
  * @returns 格式化的 JSON 字符串
  */
-export async function removeBlogsFromIndex(token: string, owner: string, repo: string, slugs: string[], branch: string): Promise<string> {
+export async function removeBlogsFromIndex(token: string, owner: string, repo: string, slugs: string[], ref: string): Promise<string> {
 	const indexPath = 'public/blogs/index.json'
 	let list: BlogIndexItem[] = []
 	try {
-		const txt = await readTextFileFromRepo(token, owner, repo, indexPath, branch)
-		if (txt) list = JSON.parse(txt)
+		// 尝试从 GitHub 读取索引文件
+		const txt = await readTextFileFromRepo(token, owner, repo, indexPath, ref)
+		if (txt) {
+			list = JSON.parse(txt)
+		} else {
+			// 如果 GitHub 上没有索引文件，尝试从本地读取
+			try {
+				const response = await fetch('/blogs/index.json')
+				if (response.ok) {
+					const localData = await response.json()
+					if (Array.isArray(localData)) {
+						list = localData
+					}
+				}
+			} catch {
+				// 忽略本地读取错误
+			}
+		}
 	} catch {
-		// 忽略解析错误，保持空列表
+		// 忽略 GitHub 读取错误，尝试从本地读取
+		try {
+			const response = await fetch('/blogs/index.json')
+			if (response.ok) {
+				const localData = await response.json()
+				if (Array.isArray(localData)) {
+					list = localData
+				}
+			}
+		} catch {
+			// 忽略本地读取错误，保持空列表
+		}
 	}
 	const slugSet = new Set(slugs.filter(Boolean))
 	if (slugSet.size === 0) {
@@ -98,6 +179,6 @@ export async function removeBlogsFromIndex(token: string, owner: string, repo: s
  * @param branch 分支名称
  * @returns 格式化的 JSON 字符串
  */
-export async function removeBlogFromIndex(token: string, owner: string, repo: string, slug: string, branch: string): Promise<string> {
-	return removeBlogsFromIndex(token, owner, repo, [slug], branch)
+export async function removeBlogFromIndex(token: string, owner: string, repo: string, slug: string, ref: string): Promise<string> {
+	return removeBlogsFromIndex(token, owner, repo, [slug], ref)
 }
