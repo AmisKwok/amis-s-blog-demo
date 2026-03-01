@@ -130,7 +130,8 @@
         "navCard": "네비게이션",
         "likePosition": "좋아요",
         "hatCard": "모자",
-        "beianCard": "비안"
+        "beianCard": "비안",
+        "introCard": "소개"
       },
       "table": {
         "card": "카드",
@@ -215,6 +216,13 @@
       "placeholder": "메시지를 남겨주세요! (답변을 받으려면 이메일을 입력하세요)",
       "nickPlaceholder": "닉네임 입력",
       "mailPlaceholder": "이메일 입력 (답변 알림용)"
+    },
+    "introCard": {
+      "title": "소개 카드",
+      "cardTitle": "카드 제목",
+      "cardTitlePlaceholder": "소개 카드 제목을 입력하세요",
+      "cardContent": "카드 내용",
+      "cardContentPlaceholder": "소개 카드 내용을 입력하세요"
     }
   },
   "home": {

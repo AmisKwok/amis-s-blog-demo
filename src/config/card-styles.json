@@ -105,12 +105,12 @@
 		"offsetY": null,
 		"enabled": false
 	},
-	"commentCard": {
-		"width": 1000,
-		"height": 600,
-		"order": 12,
-		"offsetX": null,
-		"offsetY": null,
-		"enabled": true
+	"introCard": {
+		"width": 300,
+		"height": 200,
+		"order": 9,
+		"offsetX": -400,
+		"offsetY": 100,
+		"enabled": false
 	}
 }

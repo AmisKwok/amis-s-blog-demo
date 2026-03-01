@@ -130,7 +130,8 @@
         "navCard": "导航",
         "likePosition": "点赞",
         "hatCard": "帽子",
-        "beianCard": "备案"
+        "beianCard": "备案",
+        "introCard": "简介"
       },
       "table": {
         "card": "卡片",
@@ -215,6 +216,13 @@
       "placeholder": "欢迎留言！(填写邮箱可在被回复时收到邮件提醒)",
       "nickPlaceholder": "请输入昵称",
       "mailPlaceholder": "请输入邮箱（用于接收回复通知）"
+    },
+    "introCard": {
+      "title": "简介卡片",
+      "cardTitle": "卡片标题",
+      "cardTitlePlaceholder": "请输入简介卡片标题",
+      "cardContent": "卡片内容",
+      "cardContentPlaceholder": "请输入简介卡片内容"
     }
   },
   "home": {

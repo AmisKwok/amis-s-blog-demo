@@ -130,7 +130,8 @@
         "navCard": "導航",
         "likePosition": "點讚",
         "hatCard": "帽子",
-        "beianCard": "備案"
+        "beianCard": "備案",
+        "introCard": "簡介"
       },
       "table": {
         "card": "卡片",
@@ -215,6 +216,13 @@
       "placeholder": "歡迎留言！(填寫郵箱可在被回覆時收到郵件提醒)",
       "nickPlaceholder": "請輸入暱稱",
       "mailPlaceholder": "請輸入郵箱（用於接收回覆通知）"
+    },
+    "introCard": {
+      "title": "簡介卡片",
+      "cardTitle": "卡片標題",
+      "cardTitlePlaceholder": "請輸入簡介卡片標題",
+      "cardContent": "卡片內容",
+      "cardContentPlaceholder": "請輸入簡介卡片內容"
     }
   },
   "home": {

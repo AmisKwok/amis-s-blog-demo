@@ -130,7 +130,8 @@
         "navCard": "ナビゲーション",
         "likePosition": "いいね",
         "hatCard": "帽子",
-        "beianCard": "備案"
+        "beianCard": "備案",
+        "introCard": "紹介"
       },
       "table": {
         "card": "カード",
@@ -215,6 +216,13 @@
       "placeholder": "メッセージを残してください！（返信を受け取るにはメールを入力してください）",
       "nickPlaceholder": "ニックネームを入力",
       "mailPlaceholder": "メールを入力（返信通知用）"
+    },
+    "introCard": {
+      "title": "紹介カード",
+      "cardTitle": "カードタイトル",
+      "cardTitlePlaceholder": "紹介カードのタイトルを入力してください",
+      "cardContent": "カードコンテンツ",
+      "cardContentPlaceholder": "紹介カードのコンテンツを入力してください"
     }
   },
   "home": {
