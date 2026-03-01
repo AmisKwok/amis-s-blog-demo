@@ -10,6 +10,7 @@ import LikeButton from '@/components/like-button'
 import { BlogToc } from '@/components/blog-toc'
 import { ScrollTopButton } from '@/components/scroll-top-button'
 import { useConfigStore } from '@/app/(home)/stores/config-store'
+import { OptimizedImage } from '@/components/optimized-image'
 
 /**
  * 目录项类型
@@ -51,7 +52,9 @@ export function BlogSidebar({ cover, summary, toc, slug }: BlogSidebarProps) {
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ delay: INIT_DELAY + ANIMATION_DELAY * 1 }}
 					className='bg-card w-full rounded-xl border p-3'>
-					<img src={cover} alt='cover' className='h-auto w-full rounded-xl border object-cover' />
+					<div className='relative aspect-4/4 w-full'>
+						<OptimizedImage src={cover} alt='cover' className='rounded-xl border object-cover' />
+					</div>
 				</motion.div>
 			)}
 
@@ -70,16 +73,13 @@ export function BlogSidebar({ cover, summary, toc, slug }: BlogSidebarProps) {
 				{/* 目录 */}
 				<BlogToc toc={toc} delay={INIT_DELAY + ANIMATION_DELAY * 3} />
 
-				{/* 间距 */}
-				<div className="mt-10"></div>
-
 				{/* 点赞按钮 */}
-				<div className="w-full flex justify-end">
-					<LikeButton slug={slug} delay={(INIT_DELAY + ANIMATION_DELAY * 4) * 1000} />
+				<div className="w-full flex justify-start">
+					<LikeButton slug={slug} delay={(INIT_DELAY + ANIMATION_DELAY * 4) * 1000} isInArticlePage={true} />
 				</div>
 
 				{/* 回到顶部按钮 */}
-				<div className="w-full flex justify-end mt-4">
+				<div className="w-full flex justify-start mt-4">
 					<ScrollTopButton delay={INIT_DELAY + ANIMATION_DELAY * 5} />
 				</div>
 		</div>
